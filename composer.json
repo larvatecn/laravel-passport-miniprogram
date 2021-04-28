@@ -1,0 +1,31 @@
+{
+  "name": "larva/laravel-passport-miniprogram",
+  "description": "This is a WeChat Mini Program Login.",
+  "keywords": [
+    "laravel",
+    "weapp",
+    "larva"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "laravel/passport": "^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0",
+    "illuminate/support": "^5.0 || ^6.0 || ^7.0 || ^8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Larva\\Passport\\MiniProgram\\": "src"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    },
+    "laravel": {
+      "providers": [
+        "Larva\\Passport\\MiniProgram\\MiniProgramGrantProvider"
+      ]
+    }
+  },
+  "prefer-stable": true
+}
