@@ -26,6 +26,8 @@ use Illuminate\Support\Carbon;
  * @property array|null $data 附加数据
  * @property Carbon $created_at 创建时间
  * @property Carbon $updated_at 更新时间
+ * @property \App\Models\User|null $user 用户
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|MiniProgramUser byOpenid($openid)
  * @method static \Illuminate\Database\Eloquent\Builder|MiniProgramUser byUnionid($unionid)
  * @method static \Illuminate\Database\Eloquent\Builder|MiniProgramUser byProvider($provider)
@@ -193,15 +195,16 @@ class MiniProgramUser extends Model
 
     /**
      * 生成用户名
-     * @return string|null
+     * @return string
      */
     public function generateUsername()
     {
         if (!empty($this->name)) {
             return $this->name;
-        } else {
+        } else if(!empty($this->nickname)){
             return $this->nickname;
         }
+        return '微信用户';
     }
 
     /**
@@ -235,7 +238,7 @@ class MiniProgramUser extends Model
             'provider' => static::PROVIDER_WECHAT,
             'open_id' => Arr::get($user, 'openId'),
             'union_id' => Arr::get($user, 'unionId'),
-            'nickname' => Arr::get($user, 'nickname'),
+            'nickname' => Arr::get($user, 'nickName'),
             'name' => null,
             'email' => null,
             'avatar' => Arr::get($user, 'avatarUrl'),
