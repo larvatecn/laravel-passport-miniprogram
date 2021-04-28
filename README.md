@@ -47,13 +47,13 @@ class User extends Authenticatable {
     /**
     * Find user using social provider's user
     * 
-    * @param string $authorizationCode
+    * @param string $sessionKey
     * @param string $provider Provider name as requested from oauth e.g. facebook
     * @param \Larva\Passport\MiniProgram\MiniProgramUser $socialUser
     *
     * @return User|null|void
     */
-    public static function findForPassportMiniProgramRequest($authorizationCode, $provider, $user) {
+    public static function findForPassportMiniProgramRequest($sessionKey, $provider, $user) {
         
     }
 }
