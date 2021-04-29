@@ -237,17 +237,31 @@ class MiniProgramUser extends Model
      */
     public static function decryptData(string $sessionKey, string $iv, string $encrypted): array
     {
-        $decrypted = AES::decrypt(
-            base64_decode($encrypted, false),
-            base64_decode($sessionKey, false),
-            base64_decode($iv, false)
-        );
+        $decrypted = AES::decrypt(base64_decode($encrypted, false), base64_decode($sessionKey, false), base64_decode($iv, false));
         return json_decode($decrypted, true);
     }
 
-    public static function decryptBaidu($sessionKey, $ciphertext, $iv, $app_key)
+    /**
+     * Baidu 解密
+     * @param string $sessionKey
+     * @param string $iv
+     * @param string $encrypted
+     * @return array
+     */
+    public static function decryptDataForBaidu(string $sessionKey, string $iv, string $encrypted): array
     {
-
+        $plaintext = AES::decrypt(base64_decode($encrypted, false), base64_decode($sessionKey, false), base64_decode($iv, false));
+        // trim pkcs#7 padding
+        $pad = ord(substr($plaintext, -1));
+        $pad = ($pad < 1 || $pad > 32) ? 0 : $pad;
+        $plaintext = substr($plaintext, 0, strlen($plaintext) - $pad);
+        // trim header
+        $plaintext = substr($plaintext, 16);
+        // get content length
+        $unpack = unpack("Nlen/", substr($plaintext, 0, 4));
+        // get content
+        $content = substr($plaintext, 4, $unpack['len']);
+        return json_decode($content, true);
     }
 
     /**
@@ -286,6 +300,26 @@ class MiniProgramUser extends Model
             'email' => null,
             'mobile' => Arr::get($user, 'mobile'),
             'avatar' => Arr::get($user, 'avatarUrl'),
+            'data' => $user
+        ]);
+    }
+
+    /**
+     * Baidu 用户
+     * @param array $user
+     * @return MiniProgramUser
+     */
+    public static function mapBaiduUserToObject(array $user)
+    {
+        return static::mapUserToObject([
+            'provider' => static::PROVIDER_BAIDU,
+            'open_id' => Arr::get($user, 'openid'),
+            'union_id' => null,
+            'nickname' => Arr::get($user, 'nickname'),
+            'name' => null,
+            'email' => null,
+            'mobile' => Arr::get($user, 'mobile'),
+            'avatar' => Arr::get($user, 'headimgurl'),
             'data' => $user
         ]);
     }
