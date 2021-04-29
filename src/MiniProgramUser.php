@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $name 用户名
  * @property string|null $nickname 昵称
  * @property string|null $email 邮箱
+ * @property string|null $mobile 手机
  * @property string|null $avatar 头像
  * @property string $provider 供应商
  * @property array|null $data 附加数据
@@ -42,7 +43,7 @@ class MiniProgramUser extends Model
     const PROVIDER_ALIPAY = 'alipay';
     const PROVIDER_BAIDU = 'baidu';
     const PROVIDER_WECHAT = 'wechat';
-    const PROVIDER_TAOBAO = 'taobao';
+    const PROVIDER_BYTEDANCE = 'bytedance';
 
     /**
      * 与模型关联的数据表。
@@ -57,7 +58,7 @@ class MiniProgramUser extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'open_id', 'union_id', 'provider', 'name', 'nickname', 'email', 'avatar', 'data',
+        'user_id', 'open_id', 'union_id', 'provider', 'name', 'nickname', 'email', 'mobile', 'avatar', 'data',
     ];
 
     /**
@@ -201,7 +202,7 @@ class MiniProgramUser extends Model
     {
         if (!empty($this->name)) {
             return $this->name;
-        } else if(!empty($this->nickname)){
+        } else if (!empty($this->nickname)) {
             return $this->nickname;
         }
         return '微信用户';
@@ -228,6 +229,28 @@ class MiniProgramUser extends Model
     }
 
     /**
+     * 兼容微信QQ的解密
+     * @param string $sessionKey
+     * @param string $iv
+     * @param string $encrypted
+     * @return array
+     */
+    public static function decryptData(string $sessionKey, string $iv, string $encrypted): array
+    {
+        $decrypted = AES::decrypt(
+            base64_decode($encrypted, false),
+            base64_decode($sessionKey, false),
+            base64_decode($iv, false)
+        );
+        return json_decode($decrypted, true);
+    }
+
+    public static function decryptBaidu($sessionKey, $ciphertext, $iv, $app_key)
+    {
+
+    }
+
+    /**
      * 微信用户
      * @param array $user
      * @return MiniProgramUser
@@ -241,6 +264,27 @@ class MiniProgramUser extends Model
             'nickname' => Arr::get($user, 'nickName'),
             'name' => null,
             'email' => null,
+            'mobile' => Arr::get($user, 'mobile'),
+            'avatar' => Arr::get($user, 'avatarUrl'),
+            'data' => $user
+        ]);
+    }
+
+    /**
+     * QQ用户
+     * @param array $user
+     * @return MiniProgramUser
+     */
+    public static function mapQQUserToObject(array $user): MiniProgramUser
+    {
+        return static::mapUserToObject([
+            'provider' => static::PROVIDER_QQ,
+            'open_id' => Arr::get($user, 'openId'),
+            'union_id' => Arr::get($user, 'unionId'),
+            'nickname' => Arr::get($user, 'nickName'),
+            'name' => null,
+            'email' => null,
+            'mobile' => Arr::get($user, 'mobile'),
             'avatar' => Arr::get($user, 'avatarUrl'),
             'data' => $user
         ]);

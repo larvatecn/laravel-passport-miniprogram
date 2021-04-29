@@ -22,6 +22,7 @@ class MiniProgramUsers extends Migration
             $table->string('name')->nullable()->comment('Name');
             $table->string('nickname')->nullable()->comment('NickName');
             $table->string('email')->nullable()->comment('email');
+            $table->string('mobile',11)->nullable()->comment('mobile');
             $table->string('avatar')->nullable()->comment('avatar');
             $table->json('data')->nullable()->comment('Data');
             $table->timestamps();
