@@ -205,7 +205,7 @@ class MiniProgramUser extends Model
         } else if (!empty($this->nickname)) {
             return $this->nickname;
         }
-        return '微信用户';
+        return '小程序用户';
     }
 
     /**
@@ -229,7 +229,7 @@ class MiniProgramUser extends Model
     }
 
     /**
-     * 兼容微信QQ的解密
+     * 兼容微信、QQ、头条的解密
      * @param string $sessionKey
      * @param string $iv
      * @param string $encrypted
@@ -320,6 +320,26 @@ class MiniProgramUser extends Model
             'email' => null,
             'mobile' => Arr::get($user, 'mobile'),
             'avatar' => Arr::get($user, 'headimgurl'),
+            'data' => $user
+        ]);
+    }
+
+    /**
+     * 头条 用户
+     * @param array $user
+     * @return MiniProgramUser
+     */
+    public static function mapBytedanceUserToObject(array $user)
+    {
+        return static::mapUserToObject([
+            'provider' => static::PROVIDER_BYTEDANCE,
+            'open_id' => Arr::get($user, 'openId'),
+            'union_id' => Arr::get($user, 'unionId'),
+            'nickname' => Arr::get($user, 'nickName'),
+            'name' => null,
+            'email' => null,
+            'mobile' => Arr::get($user, 'mobile'),
+            'avatar' => Arr::get($user, 'avatarUrl'),
             'data' => $user
         ]);
     }
