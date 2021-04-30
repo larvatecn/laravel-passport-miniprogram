@@ -343,4 +343,24 @@ class MiniProgramUser extends Model
             'data' => $user
         ]);
     }
+
+    /**
+     * 支付宝用户
+     * @param array $user
+     * @return MiniProgramUser
+     */
+    public static function mapAlipayUserToObject(array $user)
+    {
+        return static::mapUserToObject([
+            'provider' => static::PROVIDER_BYTEDANCE,
+            'open_id' => Arr::get($user, 'openId'),
+            'union_id' => Arr::get($user, 'unionId'),
+            'nickname' => Arr::get($user, 'nickName'),
+            'name' => null,
+            'email' => null,
+            'mobile' => Arr::get($user, 'mobile'),
+            'avatar' => Arr::get($user, 'avatar'),
+            'data' => $user
+        ]);
+    }
 }
