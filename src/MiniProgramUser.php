@@ -222,9 +222,9 @@ class MiniProgramUser extends Model
             if ($unionUser != null && $unionUser->user_id) {
                 $user['user_id'] = $unionUser->user_id;
             } else if (class_exists('\Larva\Socialite\Models\SocialUser')) {
-                $unionUser = \Larva\Socialite\Models\SocialUser::byUnionidAndProvider($user['union_id'], $user['provider']);
-                if ($unionUser != null && $unionUser->user_id) {
-                    $user['user_id'] = $unionUser->user_id;
+                $socialUser = \Larva\Socialite\Models\SocialUser::byUnionidAndProvider($user['union_id'], $user['provider'])->first();
+                if ($socialUser != null && $socialUser->user_id) {
+                    $user['user_id'] = $socialUser->user_id;
                 }
             }
         }
