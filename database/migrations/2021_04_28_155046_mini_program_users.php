@@ -15,10 +15,10 @@ class MiniProgramUsers extends Migration
     {
         Schema::create('mini_program_users', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('open_id',64);
-            $table->string('provider', 32);
-            $table->string('union_id')->index()->nullable();//UnionID
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('open_id',64)->comment('OpenId');
+            $table->string('provider', 32)->comment('平台');
+            $table->string('union_id')->index()->nullable()->comment('UnionID');
+            $table->unsignedBigInteger('user_id')->nullable()->comment('用户ID');
             $table->string('name')->nullable()->comment('Name');
             $table->string('nickname')->nullable()->comment('NickName');
             $table->string('email')->nullable()->comment('email');
