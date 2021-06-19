@@ -4,6 +4,7 @@
  * @copyright Copyright (c) 2010-2099 Jinan Larva Information Technology Co., Ltd.
  * @link http://www.larva.com.cn/
  */
+declare (strict_types=1);
 
 namespace Larva\Passport\MiniProgram;
 
@@ -60,7 +61,7 @@ class MiniProgramGrant extends AbstractGrant
     /**
      * {@inheritdoc}
      */
-    public function getIdentifier()
+    public function getIdentifier(): string
     {
         return 'mini-program';
     }
@@ -71,7 +72,7 @@ class MiniProgramGrant extends AbstractGrant
      * @return UserEntityInterface
      * @throws OAuthServerException
      */
-    protected function validateUser(ServerRequestInterface $request)
+    protected function validateUser(ServerRequestInterface $request): UserEntityInterface
     {
         $laravelRequest = new Request($request->getParsedBody());
         if (!$laravelRequest->has('provider')) {
@@ -92,7 +93,7 @@ class MiniProgramGrant extends AbstractGrant
      * @return \Laravel\Passport\Bridge\User|null
      * @throws OAuthServerException
      */
-    protected function getUserEntityByRequest($request)
+    protected function getUserEntityByRequest($request): ?User
     {
         if (is_null($model = config('auth.providers.users.model'))) {
             throw OAuthServerException::serverError('Unable to determine user model from configuration.');

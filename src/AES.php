@@ -4,8 +4,11 @@
  * @copyright Copyright (c) 2010-2099 Jinan Larva Information Technology Co., Ltd.
  * @link http://www.larva.com.cn/
  */
+declare (strict_types=1);
 
 namespace Larva\Passport\MiniProgram;
+
+use InvalidArgumentException;
 
 /**
  * AES
@@ -16,7 +19,7 @@ class AES
      * @param string $text
      * @param string $key
      * @param string $iv
-     * @param int    $option
+     * @param int $option
      *
      * @return string
      */
@@ -29,10 +32,10 @@ class AES
     }
 
     /**
-     * @param string      $cipherText
-     * @param string      $key
-     * @param string      $iv
-     * @param int         $option
+     * @param string $cipherText
+     * @param string $key
+     * @param string $iv
+     * @param int $option
      * @param string|null $method
      *
      * @return string
@@ -50,9 +53,9 @@ class AES
      *
      * @return string
      */
-    public static function getMode($key)
+    public static function getMode(string $key): string
     {
-        return 'aes-'.(8 * strlen($key)).'-cbc';
+        return 'aes-' . (8 * strlen($key)) . '-cbc';
     }
 
     /**
@@ -61,19 +64,18 @@ class AES
     public static function validateKey(string $key)
     {
         if (!in_array(strlen($key), [16, 24, 32], true)) {
-            throw new \InvalidArgumentException(sprintf('Key length must be 16, 24, or 32 bytes; got key len (%s).', strlen($key)));
+            throw new InvalidArgumentException(sprintf('Key length must be 16, 24, or 32 bytes; got key len (%s).', strlen($key)));
         }
     }
 
     /**
      * @param string $iv
-     *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function validateIv(string $iv)
     {
         if (!empty($iv) && 16 !== strlen($iv)) {
-            throw new \InvalidArgumentException('IV length must be 16 bytes.');
+            throw new InvalidArgumentException('IV length must be 16 bytes.');
         }
     }
 }

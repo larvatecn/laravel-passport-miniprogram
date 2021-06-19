@@ -5,8 +5,12 @@
  * @link http://www.larva.com.cn/
  */
 
+declare (strict_types=1);
+
 namespace Larva\Passport\MiniProgram;
 
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -28,11 +32,11 @@ use Illuminate\Support\Carbon;
  * @property Carbon $updated_at 更新时间
  * @property \App\Models\User|null $user 用户
  *
- * @method static \Illuminate\Database\Eloquent\Builder|MiniProgramUser byOpenid($openid)
- * @method static \Illuminate\Database\Eloquent\Builder|MiniProgramUser byUnionid($unionid)
- * @method static \Illuminate\Database\Eloquent\Builder|MiniProgramUser byProvider($provider)
- * @method static \Illuminate\Database\Eloquent\Builder|MiniProgramUser byOpenidAndProvider($openid, $provider)
- * @method static \Illuminate\Database\Eloquent\Builder|MiniProgramUser byUnionidAndProvider($unionid, $provider)
+ * @method static Builder|MiniProgramUser byOpenid($openid)
+ * @method static Builder|MiniProgramUser byUnionid($unionid)
+ * @method static Builder|MiniProgramUser byProvider($provider)
+ * @method static Builder|MiniProgramUser byOpenidAndProvider($openid, $provider)
+ * @method static Builder|MiniProgramUser byUnionidAndProvider($unionid, $provider)
  * @method static MiniProgramUser|null find($id)
  * @author Tongle Xu <xutongle@gmail.com>
  */
@@ -82,10 +86,10 @@ class MiniProgramUser extends Model
     /**
      * 为数组 / JSON 序列化准备日期。
      *
-     * @param \DateTimeInterface $date
+     * @param DateTimeInterface $date
      * @return string
      */
-    protected function serializeDate(\DateTimeInterface $date): string
+    protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format($this->dateFormat ?: 'Y-m-d H:i:s');
     }
@@ -97,9 +101,7 @@ class MiniProgramUser extends Model
      */
     public function user()
     {
-        return $this->belongsTo(
-            config('auth.providers.' . config('auth.guards.web.provider') . '.model')
-        );
+        return $this->belongsTo(config('auth.providers.' . config('auth.guards.web.provider') . '.model'));
     }
 
     /**
@@ -125,11 +127,11 @@ class MiniProgramUser extends Model
 
     /**
      * Finds an account by open_id.
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param string $openid
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
-    public function scopeByOpenid($query, $openid)
+    public function scopeByOpenid($query, string $openid)
     {
         return $query->where('open_id', $openid);
     }
@@ -137,21 +139,21 @@ class MiniProgramUser extends Model
     /**
      * Finds an account by union_id.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param string $unionid
      * @param string $provider
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
-    public function scopeByUnionid($query, $unionid)
+    public function scopeByUnionid($query, string $unionid)
     {
         return $query->where('union_id', $unionid);
     }
 
     /**
      * Finds an account by user_id.
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param integer $userId
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
     public function scopeByUserid($query, $userId)
     {
@@ -160,35 +162,35 @@ class MiniProgramUser extends Model
 
     /**
      * Finds an account by provider.
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param string $provider
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
-    public function scopeByProvider($query, $provider)
+    public function scopeByProvider($query, string $provider)
     {
         return $query->where('provider', $provider);
     }
 
     /**
      * Finds an account by open_id and provider.
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param string $openid
      * @param string $provider
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
-    public function scopeByOpenidAndProvider($query, $openid, $provider)
+    public function scopeByOpenidAndProvider($query, string $openid, string $provider)
     {
         return $query->where('open_id', $openid)->where('provider', $provider);
     }
 
     /**
      * Finds an account by union_id and provider.
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param Builder $query
      * @param string $unionid
      * @param string $provider
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @return Builder
      */
-    public function scopeByUnionidAndProvider($query, $unionid, $provider)
+    public function scopeByUnionidAndProvider($query, string $unionid, string $provider)
     {
         return $query->where('union_id', $unionid)->where('provider', $provider);
     }
@@ -197,11 +199,11 @@ class MiniProgramUser extends Model
      * 生成用户名
      * @return string
      */
-    public function generateUsername()
+    public function generateUsername(): string
     {
-        if (!empty($this->name)) {
+        if (!empty($this->name) && !is_null($this->name)) {
             return $this->name;
-        } else if (!empty($this->nickname)) {
+        } else if (!empty($this->nickname) && !is_null($this->nickname)) {
             return $this->nickname;
         }
         return '小程序用户';
@@ -227,10 +229,7 @@ class MiniProgramUser extends Model
                 }
             }
         }
-
-        return MiniProgramUser::updateOrCreate([
-            'open_id' => $user['open_id'], 'provider' => $user['provider']
-        ], $user);
+        return MiniProgramUser::updateOrCreate(['open_id' => $user['open_id'], 'provider' => $user['provider']], $user);
     }
 
     /**
@@ -314,7 +313,7 @@ class MiniProgramUser extends Model
      * @param array $user
      * @return MiniProgramUser
      */
-    public static function mapBaiduUserToObject(array $user)
+    public static function mapBaiduUserToObject(array $user): MiniProgramUser
     {
         return static::mapUserToObject([
             'provider' => static::PROVIDER_BAIDU,
@@ -334,7 +333,7 @@ class MiniProgramUser extends Model
      * @param array $user
      * @return MiniProgramUser
      */
-    public static function mapBytedanceUserToObject(array $user)
+    public static function mapBytedanceUserToObject(array $user): MiniProgramUser
     {
         return static::mapUserToObject([
             'provider' => static::PROVIDER_BYTEDANCE,
@@ -354,7 +353,7 @@ class MiniProgramUser extends Model
      * @param array $user
      * @return MiniProgramUser
      */
-    public static function mapAlipayUserToObject(array $user)
+    public static function mapAlipayUserToObject(array $user): MiniProgramUser
     {
         return static::mapUserToObject([
             'provider' => static::PROVIDER_BYTEDANCE,

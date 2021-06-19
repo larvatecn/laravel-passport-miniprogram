@@ -5,8 +5,11 @@
  * @link http://www.larva.com.cn/
  */
 
+declare (strict_types=1);
+
 namespace Larva\Passport\MiniProgram;
 
+use Exception;
 use Laravel\Passport\Bridge\RefreshTokenRepository;
 use Laravel\Passport\Bridge\UserRepository;
 use Laravel\Passport\Passport;
@@ -24,7 +27,7 @@ class MiniProgramGrantProvider extends PassportServiceProvider
      * Bootstrap any application services.
      *
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function boot()
     {
@@ -48,7 +51,7 @@ class MiniProgramGrantProvider extends PassportServiceProvider
      * Create and configure a Password grant instance.
      *
      * @return MiniProgramGrant
-     * @throws \Exception
+     * @throws Exception
      */
     protected function makeRequestGrant(): MiniProgramGrant
     {
