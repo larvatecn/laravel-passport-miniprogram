@@ -34,7 +34,6 @@ class MiniProgramGrantProvider extends PassportServiceProvider
         if ($this->app->runningInConsole()) {
             $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         }
-        $this->app->make(AuthorizationServer::class)->enableGrantType($this->makeRequestGrant(), Passport::tokensExpireIn());
     }
 
     /**
@@ -44,7 +43,9 @@ class MiniProgramGrantProvider extends PassportServiceProvider
      */
     public function register()
     {
-
+        $this->app->afterResolving(AuthorizationServer::class, function (AuthorizationServer $oauthServer) {
+            $oauthServer->enableGrantType($this->makeMiniProgramGrant(), Passport::tokensExpireIn());
+        });
     }
 
     /**
@@ -53,9 +54,12 @@ class MiniProgramGrantProvider extends PassportServiceProvider
      * @return MiniProgramGrant
      * @throws Exception
      */
-    protected function makeRequestGrant(): MiniProgramGrant
+    protected function makeMiniProgramGrant(): MiniProgramGrant
     {
-        $grant = new MiniProgramGrant($this->app->make(UserRepository::class), $this->app->make(RefreshTokenRepository::class));
+        $grant = new MiniProgramGrant(
+            $this->app->make(UserRepository::class),
+            $this->app->make(RefreshTokenRepository::class)
+        );
         $grant->setRefreshTokenTTL(Passport::refreshTokensExpireIn());
         return $grant;
     }

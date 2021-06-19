@@ -9,7 +9,8 @@ declare (strict_types=1);
 namespace Larva\Passport\MiniProgram;
 
 use DateInterval;
-use RuntimeException;
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Exception\UniqueTokenIdentifierConstraintViolationException;
 use Illuminate\Http\Request;
 use Laravel\Passport\Bridge\User;
 use League\OAuth2\Server\Entities\UserEntityInterface;
@@ -29,9 +30,9 @@ use Psr\Http\Message\ServerRequestInterface;
 class MiniProgramGrant extends AbstractGrant
 {
     /**
+     * MiniProgramGrant constructor.
      * @param UserRepositoryInterface $userRepository
      * @param RefreshTokenRepositoryInterface $refreshTokenRepository
-     * @throws \Exception
      */
     public function __construct(UserRepositoryInterface $userRepository, RefreshTokenRepositoryInterface $refreshTokenRepository)
     {
@@ -41,27 +42,8 @@ class MiniProgramGrant extends AbstractGrant
     }
 
     /**
-     * @throws OAuthServerException
-     */
-    public function respondToAccessTokenRequest(ServerRequestInterface $request, ResponseTypeInterface $responseType, DateInterval $accessTokenTTL): ResponseTypeInterface
-    {
-        // Validate request
-        $client = $this->validateClient($request);
-        $scopes = $this->validateScopes($this->getRequestParameter('scope', $request));
-        $user = $this->validateUser($request);
-        // Finalize the requested scopes
-        $scopes = $this->scopeRepository->finalizeScopes($scopes, $this->getIdentifier(), $client, $user->getIdentifier());
-        // Issue and persist new tokens
-        $accessToken = $this->issueAccessToken($accessTokenTTL, $client, $user->getIdentifier(), $scopes);
-        $refreshToken = $this->issueRefreshToken($accessToken);
-        // Inject tokens into response
-        $responseType->setAccessToken($accessToken);
-        $responseType->setRefreshToken($refreshToken);
-        return $responseType;
-    }
-
-    /**
-     * {@inheritdoc}
+     * 获取标识
+     * @return string
      */
     public function getIdentifier(): string
     {
@@ -69,18 +51,48 @@ class MiniProgramGrant extends AbstractGrant
     }
 
     /**
+     * Respond to an incoming request.
      * @param ServerRequestInterface $request
-     *
+     * @param ResponseTypeInterface $responseType
+     * @param DateInterval $accessTokenTTL
+     * @return ResponseTypeInterface
+     * @throws OAuthServerException
+     * @throws UniqueTokenIdentifierConstraintViolationException
+     */
+    public function respondToAccessTokenRequest(ServerRequestInterface $request, ResponseTypeInterface $responseType, DateInterval $accessTokenTTL): ResponseTypeInterface
+    {
+        // Validate request
+        $client = $this->validateClient($request);
+        $scopes = $this->validateScopes($this->getRequestParameter('scope', $request));
+        $user = $this->validateUser($request, $client);
+
+        // Finalize the requested scopes
+        $scopes = $this->scopeRepository->finalizeScopes($scopes, $this->getIdentifier(), $client, $user->getIdentifier());
+
+        // Issue and persist new tokens
+        $accessToken = $this->issueAccessToken($accessTokenTTL, $client, $user->getIdentifier(), $scopes);
+        $refreshToken = $this->issueRefreshToken($accessToken);
+
+        // Inject tokens into response
+        $responseType->setAccessToken($accessToken);
+        $responseType->setRefreshToken($refreshToken);
+        return $responseType;
+    }
+
+    /**
+     * 验证用户
+     * @param ServerRequestInterface $request
+     * @param ClientEntityInterface $client
      * @return UserEntityInterface
      * @throws OAuthServerException
      */
-    protected function validateUser(ServerRequestInterface $request): UserEntityInterface
+    protected function validateUser(ServerRequestInterface $request, ClientEntityInterface $client): UserEntityInterface
     {
         $laravelRequest = new Request($request->getParsedBody());
         if (!$laravelRequest->has('provider')) {
             throw OAuthServerException::invalidRequest('provider');
         }
-        $user = $this->getUserEntityByRequest($laravelRequest);
+        $user = $this->getUserEntityByRequest($laravelRequest, $this->getIdentifier(), $client);
         if ($user instanceof UserEntityInterface === false) {
             $this->getEmitter()->emit(new RequestEvent(RequestEvent::USER_AUTHENTICATION_FAILED, $request));
             throw OAuthServerException::invalidCredentials();
@@ -91,22 +103,25 @@ class MiniProgramGrant extends AbstractGrant
     /**
      * Retrieve user by request.
      * @param $request
-     * @return User|void
+     * @param string $grantType
+     * @param ClientEntityInterface $clientEntity
+     * @return User|null
+     * @throws OAuthServerException
      */
-    protected function getUserEntityByRequest($request)
+    protected function getUserEntityByRequest($request, string $grantType, ClientEntityInterface $clientEntity): ?User
     {
         $provider = config('auth.guards.api.provider');
         if (is_null($model = config('auth.providers.' . $provider . '.model'))) {
-            throw new RuntimeException('Unable to determine authentication model from configuration.');
+            throw OAuthServerException::serverError('Unable to determine authentication model from configuration.');
         }
         if (method_exists($model, 'findAndValidateForPassportMiniProgramRequest')) {
             $user = (new $model)->findAndValidateForPassportMiniProgramRequest($request);
-            if (! $user) {
+            if (!$user) {
                 return null;
             }
             return new User($user->getAuthIdentifier());
         } else {
-            throw new RuntimeException('Unable to find findAndValidateForPassportMiniProgramRequest method on user model.');
+            throw OAuthServerException::serverError('Unable to find findAndValidateForPassportSmsRequest method on user model.');
         }
     }
 }

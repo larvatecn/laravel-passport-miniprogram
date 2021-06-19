@@ -12,6 +12,7 @@ namespace Larva\Passport\MiniProgram;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
@@ -97,9 +98,9 @@ class MiniProgramUser extends Model
     /**
      * Get the user relation.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(config('auth.providers.' . config('auth.guards.web.provider') . '.model'));
     }
