@@ -8,6 +8,8 @@ declare (strict_types=1);
 
 namespace Larva\Passport\MiniProgram;
 
+use DateInterval;
+use RuntimeException;
 use Illuminate\Http\Request;
 use Laravel\Passport\Bridge\User;
 use League\OAuth2\Server\Entities\UserEntityInterface;
@@ -35,13 +37,13 @@ class MiniProgramGrant extends AbstractGrant
     {
         $this->setUserRepository($userRepository);
         $this->setRefreshTokenRepository($refreshTokenRepository);
-        $this->refreshTokenTTL = new \DateInterval('P1M');
+        $this->refreshTokenTTL = new DateInterval('P1M');
     }
 
     /**
      * @throws OAuthServerException
      */
-    public function respondToAccessTokenRequest(ServerRequestInterface $request, ResponseTypeInterface $responseType, \DateInterval $accessTokenTTL)
+    public function respondToAccessTokenRequest(ServerRequestInterface $request, ResponseTypeInterface $responseType, DateInterval $accessTokenTTL): ResponseTypeInterface
     {
         // Validate request
         $client = $this->validateClient($request);
@@ -88,22 +90,23 @@ class MiniProgramGrant extends AbstractGrant
 
     /**
      * Retrieve user by request.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Laravel\Passport\Bridge\User|null
-     * @throws OAuthServerException
+     * @param $request
+     * @return User|void
      */
-    protected function getUserEntityByRequest($request): ?User
+    protected function getUserEntityByRequest($request)
     {
-        if (is_null($model = config('auth.providers.users.model'))) {
-            throw OAuthServerException::serverError('Unable to determine user model from configuration.');
+        $provider = config('auth.guards.api.provider');
+        if (is_null($model = config('auth.providers.' . $provider . '.model'))) {
+            throw new RuntimeException('Unable to determine authentication model from configuration.');
         }
-        //Validator
-        if (method_exists($model, 'findForPassportMiniProgramRequest')) {
-            $user = $model::findForPassportMiniProgramRequest($request);
+        if (method_exists($model, 'findAndValidateForPassportMiniProgramRequest')) {
+            $user = (new $model)->findAndValidateForPassportMiniProgramRequest($request);
+            if (! $user) {
+                return null;
+            }
+            return new User($user->getAuthIdentifier());
         } else {
-            throw OAuthServerException::serverError('Unable to find findForPassportMiniProgramRequest method on user model.');
+            throw new RuntimeException('Unable to find findAndValidateForPassportMiniProgramRequest method on user model.');
         }
-        return ($user) ? new User($user->id) : null;
     }
 }
