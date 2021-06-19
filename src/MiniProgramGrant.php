@@ -114,8 +114,8 @@ class MiniProgramGrant extends AbstractGrant
         if (is_null($model = config('auth.providers.' . $provider . '.model'))) {
             throw OAuthServerException::serverError('Unable to determine authentication model from configuration.');
         }
-        if (method_exists($model, 'findAndValidateForPassportMiniProgramRequest')) {
-            $user = (new $model)->findAndValidateForPassportMiniProgramRequest($request);
+        if (method_exists($model, 'findAndValidateForPassportMiniProgram')) {
+            $user = (new $model)->findAndValidateForPassportMiniProgram($request);
             if (!$user) {
                 return null;
             }
