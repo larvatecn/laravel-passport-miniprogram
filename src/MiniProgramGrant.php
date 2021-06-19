@@ -121,7 +121,7 @@ class MiniProgramGrant extends AbstractGrant
             }
             return new User($user->getAuthIdentifier());
         } else {
-            throw OAuthServerException::serverError('Unable to find findAndValidateForPassportSmsRequest method on user model.');
+            throw OAuthServerException::serverError('Unable to find findAndValidateForPassportMiniProgram method on user model.');
         }
     }
 }
