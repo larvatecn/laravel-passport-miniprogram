@@ -211,6 +211,33 @@ class MiniProgramUser extends Model
     }
 
     /**
+     * 获取Openid
+     * @param string $provider
+     * @param string|int $userId
+     * @return string|null
+     */
+    public static function getOpenid(string $provider, $userId): ?string
+    {
+        return static::byProvider($provider)->where('user_id', $userId)->value('open_id');
+    }
+
+    /**
+     * 获取 微信小程序Openid
+     */
+    public static function getWechatOpenid($userId): ?string
+    {
+        return static::getOpenid(static::PROVIDER_WECHAT, $userId);
+    }
+
+    /**
+     * 获取 支付宝小程序Openid
+     */
+    public static function getAlipayOpenid($userId): ?string
+    {
+        return static::getOpenid(static::PROVIDER_ALIPAY, $userId);
+    }
+
+    /**
      * 获取用户
      * @param array $user
      * @return MiniProgramUser
