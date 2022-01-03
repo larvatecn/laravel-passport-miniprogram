@@ -49,10 +49,10 @@ class User extends Authenticatable {
 }
 ```
 
-| id | provider | social_id | user_id | created_at        | updated_at        |
-|----|----------|------------------|---------|-------------------|-------------------|
-| 1  | facebook | XXXXXXXXXXXXXX   | 1       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
-| 2  | github   | XXXXXXXXXXXXXX   | 2       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
-| 3  | google   | XXXXXXXXXXXXXX   | 3       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
+| id  | provider | social_id      | user_id | created_at        | updated_at        |
+|-----|----------|----------------|---------|-------------------|-------------------|
+| 1   | facebook | XXXXXXXXXXXXXX | 1       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
+| 2   | github   | XXXXXXXXXXXXXX | 2       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
+| 3   | google   | XXXXXXXXXXXXXX | 3       | XX-XX-XX XX:XX:XX | XX-XX-XX XX:XX:XX |
 
 **That's all folks**
