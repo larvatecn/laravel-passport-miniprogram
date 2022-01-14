@@ -13,7 +13,7 @@
     "ext-openssl": "*",
     "ext-json": "*",
     "laravel/passport": "^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0",
-    "illuminate/support": "^5.0 || ^6.0 || ^7.0 || ^8.0"
+    "illuminate/support": "^5.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0"
   },
   "require-dev": {
     "larva/laravel-socialite": "^1.0"
